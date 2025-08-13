@@ -190,6 +190,7 @@ export function Header() {
                 {...link}
                 isActive={pathname === link.href || (link.href !== '/' && pathname.startsWith(link.href))}
                 isDesktop={true}
+                
               />
             ))}
             <DropdownMenu>
