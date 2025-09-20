@@ -82,12 +82,40 @@ export function OpportunityForm({ opportunity }: OpportunityFormProps) {
   const router = useRouter();
   const { toast } = useToast();
   const form = useForm<OpportunityFormValues>({
-    resolver: zodResolver(opportunitySchema),
-    defaultValues: {
-      featured: false,
-      contractExtensible: false,
-    },
-  });
+  resolver: zodResolver(opportunitySchema),
+  defaultValues: {
+    id: undefined,
+    title: "",
+    organization: "",
+    type: "Job",
+    location: "",
+    description: "",
+    url: "",
+    featured: false,
+    logoUrl: "",
+    category: "",
+    closingDate: undefined,
+    postDate: undefined,
+    reference: "",
+    numberOfVacancies: 1,
+    salaryRange: "",
+    yearsOfExperience: "",
+    probationPeriod: "",
+    contractType: "",
+    contractDuration: "",
+    contractExtensible: false,
+    minimumEducation: "",
+    gender: "Any",
+    functionalArea: "",
+    submissionEmail: "",
+    responsibilities: "",
+    qualifications: "",
+    eligibility: "",
+    awardAmount: "",
+    countries: "",
+  },
+});
+
 
   const opportunityType = form.watch('type');
 
@@ -138,28 +166,53 @@ export function OpportunityForm({ opportunity }: OpportunityFormProps) {
   }, [opportunity, form]);
   
 
-  const onSubmit = (data: OpportunityFormValues) => {
-    // In a real app, you would send this data to your API
-    console.log('Form submitted:', {
-      ...data,
-      id: opportunity?.id || new Date().toISOString(),
-      closingDate: data.closingDate?.toISOString(),
-      postDate: data.postDate?.toISOString(),
-      responsibilities: stringToArray(data.responsibilities),
-      qualifications: stringToArray(data.qualifications),
-      eligibility: stringToArray(data.eligibility),
-      countries: stringToArray(data.countries),
+  const onSubmit = async (data: OpportunityFormValues) => {
+  try {
+    const token = localStorage.getItem('token'); // یا هر جایی که توکن رو ذخیره می‌کنی
+    const response = await fetch("http://localhost:5071/api/Post/post", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}` 
+      },
+      credentials: "include", // اگه JWT یا کوکی داری برای auth
+      body: JSON.stringify({
+        ...data,
+        closingDate: data.closingDate?.toISOString(),
+        postDate: data.postDate?.toISOString(),
+        responsibilities: stringToArray(data.responsibilities).join('\n'),
+        qualifications: stringToArray(data.qualifications).join('\n'),
+        eligibility: stringToArray(data.eligibility).join('\n'),
+        countries: stringToArray(data.countries).join('\n'),
+        // userId removed
+      }),
+
     });
+
+    if (!response.ok) {
+      throw new Error("Failed to save opportunity");
+    }
+
+    const result = await response.json();
 
     toast({
       title: "Success",
-      description: `Opportunity ${opportunity ? 'updated' : 'created'} successfully.`,
+      description: `Opportunity ${opportunity ? "updated" : "created"} successfully.`,
     });
 
-    // Since we don't have a real backend, we'll just redirect.
-    router.push('/admin/opportunities');
+    // Redirect after success
+    router.push("/admin/opportunities");
     router.refresh();
-  };
+  } catch (error) {
+    console.error(error);
+    toast({
+      title: "Error",
+      description: "Something went wrong while saving the opportunity.",
+      variant: "destructive",
+    });
+  }
+};
+
 
   return (
     <Form {...form}>

@@ -1,11 +1,14 @@
-
-import { opportunities } from '@/lib/data';
+import { fetchOpportunities } from '@/lib/data';
 import { notFound } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Briefcase, GraduationCap, Star, MapPin, Building, Tag, ExternalLink, DollarSign, CheckCircle, CalendarPlus, CalendarX, FileKey2, Users, Wallet, Award, Clock, FileText, CalendarClock, RefreshCw, Layers, Globe, Mail, Users2 } from 'lucide-react';
+import { 
+  Briefcase, GraduationCap, Star, MapPin, Building, Tag, ExternalLink, DollarSign, 
+  CheckCircle, CalendarPlus, CalendarX, FileKey2, Users, Wallet, Award, Clock, 
+  FileText, CalendarClock, RefreshCw, Layers, Globe, Mail, Users2 
+} from 'lucide-react';
 import type { Opportunity } from '@/lib/types';
 import type { Metadata } from 'next';
 import { Badge } from '@/components/ui/badge';
@@ -18,12 +21,18 @@ const typeIcons: Record<Opportunity['type'], React.ReactNode> = {
   Internship: <Star className="h-4 w-4" />,
 };
 
-function DetailItem({ icon: Icon, label, value, variant = 'default' }: { icon: React.ElementType; label: string; value?: React.ReactNode; variant?: 'default' | 'destructive' }) {
+function DetailItem({ icon: Icon, label, value, variant = 'default' }: { 
+  icon: React.ElementType; 
+  label: string; 
+  value?: React.ReactNode; 
+  variant?: 'default' | 'destructive' 
+}) {
   if (value === null || value === undefined || value === '') return null;
 
   return (
     <div className="flex items-start gap-3">
-      <div className={cn("flex h-8 w-8 items-center justify-center rounded-lg flex-shrink-0", 
+      <div className={cn(
+        "flex h-8 w-8 items-center justify-center rounded-lg flex-shrink-0", 
         variant === 'default' && 'bg-primary/10 text-primary',
         variant === 'destructive' && 'bg-destructive/10 text-destructive'
       )}>
@@ -31,7 +40,8 @@ function DetailItem({ icon: Icon, label, value, variant = 'default' }: { icon: R
       </div>
       <div>
         <p className="text-muted-foreground">{label}</p>
-        <p className={cn("font-medium",
+        <p className={cn(
+          "font-medium",
           variant === 'default' && 'text-foreground',
           variant === 'destructive' && 'text-destructive'
         )}>
@@ -43,7 +53,8 @@ function DetailItem({ icon: Icon, label, value, variant = 'default' }: { icon: R
 }
 
 export async function generateMetadata({ params }: { params: { id: string } }): Promise<Metadata> {
-  const opportunity = opportunities.find((op) => op.id === params.id);
+  const opportunities = await fetchOpportunities(); // ✅ گرفتن دیتا
+  const opportunity = opportunities.find((op) => String(op.id) === params.id);
 
   if (!opportunity) {
     return {
@@ -57,8 +68,9 @@ export async function generateMetadata({ params }: { params: { id: string } }): 
   }
 }
 
-export default function OpportunityDetailPage({ params }: { params: { id: string } }) {
-  const opportunity = opportunities.find((op) => op.id === params.id);
+export default async function OpportunityDetailPage({ params }: { params: { id: string } }) {
+  const opportunities = await fetchOpportunities(); // ✅ گرفتن دیتا
+  const opportunity = opportunities.find((op) => String(op.id) === params.id);
 
   if (!opportunity) {
     notFound();
@@ -68,6 +80,7 @@ export default function OpportunityDetailPage({ params }: { params: { id: string
     <div className="bg-background">
       <div className="container py-12 md:py-16">
         <div className="grid md:grid-cols-3 gap-8 lg:gap-12">
+          {/* left side */}
           <div className="md:col-span-2 space-y-8">
             <Card className="bg-secondary border-0">
               <CardHeader className="flex flex-col items-start gap-4 md:flex-row">
@@ -80,7 +93,9 @@ export default function OpportunityDetailPage({ params }: { params: { id: string
                   data-ai-hint="company logo"
                 />
                 <div className="flex-1">
-                  <Badge variant="secondary" className="mb-2 bg-primary/10 text-primary border-primary/20">{opportunity.type}</Badge>
+                  <Badge variant="secondary" className="mb-2 bg-primary/10 text-primary border-primary/20">
+                    {opportunity.type}
+                  </Badge>
                   <h1 className="text-3xl font-bold font-headline">{opportunity.title}</h1>
                   <p className="text-lg text-muted-foreground flex items-center gap-2 mt-1">
                     <Building className="h-5 w-5" />
@@ -93,6 +108,7 @@ export default function OpportunityDetailPage({ params }: { params: { id: string
               </CardContent>
             </Card>
 
+            {/* Responsibilities */}
             {(opportunity.type === 'Job' || opportunity.type === 'Internship') && opportunity.responsibilities && (
               <Card className="bg-secondary border-0">
                 <CardHeader>
@@ -111,6 +127,7 @@ export default function OpportunityDetailPage({ params }: { params: { id: string
               </Card>
             )}
 
+            {/* Qualifications */}
             {(opportunity.type === 'Job' || opportunity.type === 'Internship') && opportunity.qualifications && (
               <Card className="bg-secondary border-0">
                 <CardHeader>
@@ -129,24 +146,28 @@ export default function OpportunityDetailPage({ params }: { params: { id: string
               </Card>
             )}
 
-            {opportunity.type === 'Scholarship' && opportunity.eligibility && (
+            {/* Eligibility */}
+            {opportunity.type === 'Scholarship' && Array.isArray(opportunity.eligibility) && opportunity.eligibility.length > 0 && (
               <Card className="bg-secondary border-0">
                 <CardHeader>
                   <CardTitle>Eligibility Criteria</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <ul className="space-y-3">
-                    {opportunity.eligibility.map((item, index) => 
-                       <li key={index} className="flex items-start gap-3">
+                    {opportunity.eligibility.map((item, index) => (
+                      <li key={index} className="flex items-start gap-3">
                         <CheckCircle className="h-5 w-5 mt-1 text-primary flex-shrink-0" />
                         <span className="text-muted-foreground">{item}</span>
                       </li>
-                    )}
+                    ))}
                   </ul>
                 </CardContent>
               </Card>
             )}
+
           </div>
+
+          {/* right side */}
           <div className="md:col-span-1">
             <div className="sticky top-24 space-y-6">
               <Card className="bg-secondary border-0">
@@ -156,7 +177,12 @@ export default function OpportunityDetailPage({ params }: { params: { id: string
                 <CardContent className="space-y-4 text-sm">
                     <DetailItem icon={Tag} label="Category" value={opportunity.category} />
                     <DetailItem icon={MapPin} label="Location" value={opportunity.location} />
-                    <DetailItem icon={Globe} label="Country" value={opportunity.countries?.join(', ')} />
+                    <DetailItem 
+  icon={Globe} 
+  label="Country" 
+  value={Array.isArray(opportunity.countries) ? opportunity.countries.join(', ') : opportunity.countries} 
+/>
+
                     <DetailItem icon={Users} label="Number of Vacancies" value={opportunity.numberOfVacancies} />
                     <DetailItem icon={Layers} label="Functional Area" value={opportunity.functionalArea} />
                     <DetailItem icon={Users2} label="Gender" value={opportunity.gender} />
@@ -170,10 +196,20 @@ export default function OpportunityDetailPage({ params }: { params: { id: string
                     <DetailItem icon={FileKey2} label="Reference" value={opportunity.reference} />
                     <DetailItem icon={Mail} label="Submission Email" value={opportunity.submissionEmail} />
                     {opportunity.awardAmount && <DetailItem icon={DollarSign} label="Award" value={opportunity.awardAmount} />}
-                    <DetailItem icon={CalendarPlus} label="Post Date" value={opportunity.postDate ? new Date(opportunity.postDate).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) : undefined} />
-                    <DetailItem icon={CalendarX} label="Closing Date" variant="destructive" value={opportunity.closingDate ? new Date(opportunity.closingDate).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) : undefined} />
+                    <DetailItem 
+                      icon={CalendarPlus} 
+                      label="Post Date" 
+                      value={opportunity.postDate ? new Date(opportunity.postDate).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) : undefined} 
+                    />
+                    <DetailItem 
+                      icon={CalendarX} 
+                      label="Closing Date" 
+                      variant="destructive" 
+                      value={opportunity.closingDate ? new Date(opportunity.closingDate).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) : undefined} 
+                    />
                 </CardContent>
               </Card>
+
               <div>
                 <Button asChild size="lg" className="w-full text-lg py-6">
                     <Link href={opportunity.submissionEmail ? `mailto:${opportunity.submissionEmail}` : opportunity.url} target="_blank" rel="noopener noreferrer">

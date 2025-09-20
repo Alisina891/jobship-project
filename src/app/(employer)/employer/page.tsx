@@ -1,15 +1,48 @@
-
+"use client"
 import type { Metadata } from 'next';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Briefcase, Users, FileText, PlusCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
+import { checkEmployer } from '@/components/ui/checkEmployer';
+import { useRouter } from 'next/navigation';
+import { useState } from 'react';
+import { useEffect } from 'react';
 
-export const metadata: Metadata = {
-  title: 'Employer Dashboard | Bepall',
-};
 
 export default function EmployerDashboardPage() {
+
+
+  const [mounted , setMounted ] = useState(false)
+      const router = useRouter();
+  
+     useEffect(() => {
+        setMounted(true); // پس از mount شدن صفحه
+      }, []);
+
+
+      useEffect(() => {
+        
+        if (!mounted) return;
+
+        const token = localStorage.getItem("token");
+        if (!token) {
+          router.replace("/login"); // لاگین نشده
+          return;
+        }
+
+        checkEmployer(token).then((isEmployer) => {
+          if (!isEmployer) {
+            router.replace("/login"); // نقش اشتباه
+          }
+        }).catch((err) => {
+          console.error(err);
+          router.replace("/login"); // اگر خطایی رخ دهد، به لاگین برگردان
+        });
+      }, [mounted, router]);
+
+
+
   return (
     <div className="p-6 md:p-8">
       <div className="flex items-center justify-between mb-8">

@@ -24,6 +24,12 @@ const nextConfig = {
         port: '',
         pathname: '/**',
       },
+      {
+        protocol: 'http',
+        hostname: 'localhost',
+        port: '5071',       // 👈 your ASP.NET backend port
+        pathname: '/uploads/**',
+      },
     ],
   },
 };

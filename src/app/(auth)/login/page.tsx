@@ -26,17 +26,26 @@ export default function LoginPage() {
 
       const data = await res.json();
 
-      if (res.ok) {
-        // ذخیره JWT در localStorage
+      if (res.ok && data.user) {
+        // فقط ذخیره JWT در localStorage
         localStorage.setItem('token', data.token);
+        localStorage.setItem('user', JSON.stringify(data.user));
 
-        // ذخیره اطلاعات کاربر (در صورت نیاز)
-        if (data.user) {
-          localStorage.setItem('user', JSON.stringify(data.user));
+        // هدایت بر اساس نقش
+        switch (data.user.role) {
+          case 'Admin':
+            router.push('/admin');
+            break;
+          case 'User':
+            router.push('/profile');
+            break;
+          case 'Employer':
+            router.push('/employer');
+            break;
+          default:
+            router.push('/login');
+            break;
         }
-
-        // هدایت به پروفایل
-        router.push('/profile');
       } else {
         setError(data.message || 'Invalid email or password');
       }

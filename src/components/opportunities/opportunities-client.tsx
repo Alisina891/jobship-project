@@ -28,26 +28,30 @@ export function OpportunitiesClient({ opportunities }: { opportunities: Opportun
     if (categoryFilter !== 'all') params.set('category', categoryFilter); else params.delete('category');
     if (locationFilter.trim()) params.set('location', locationFilter.trim()); else params.delete('location');
 
-    // Debounce router push
     const handler = setTimeout(() => {
         router.replace(`${pathname}?${params.toString()}`);
     }, 300);
 
-    return () => {
-        clearTimeout(handler);
-    };
+    return () => clearTimeout(handler);
   }, [searchTerm, typeFilter, categoryFilter, locationFilter, pathname, router, searchParams]);
 
   const filteredOpportunities = useMemo(() => {
     return opportunities.filter((op) => {
+      const title = op.title || '';
+      const organization = op.organization || '';
+      const description = op.description || '';
+      const location = op.location || '';
+      const category = op.category || '';
+      const type = op.type || '';
+
       const matchesSearch =
-        op.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        op.organization.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        op.description.toLowerCase().includes(searchTerm.toLowerCase());
+        title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        organization.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        description.toLowerCase().includes(searchTerm.toLowerCase());
       
-      const matchesType = typeFilter === 'All' || op.type === typeFilter;
-      const matchesCategory = categoryFilter === 'all' || categories.find(c => c.slug === categoryFilter)?.name === op.category;
-      const matchesLocation = op.location.toLowerCase().includes(locationFilter.toLowerCase());
+      const matchesType = typeFilter === 'All' || type === typeFilter;
+      const matchesCategory = categoryFilter === 'all' || categories.find(c => c.slug === categoryFilter)?.name === category;
+      const matchesLocation = location.toLowerCase().includes(locationFilter.toLowerCase());
 
       return matchesSearch && matchesType && matchesCategory && matchesLocation;
     });
@@ -116,7 +120,6 @@ export function OpportunitiesClient({ opportunities }: { opportunities: Opportun
       <div className="mb-8 flex justify-end">
         <Button variant="ghost" onClick={resetFilters}>Reset Filters</Button>
       </div>
-
 
       {filteredOpportunities.length > 0 ? (
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">

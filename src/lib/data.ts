@@ -1,7 +1,7 @@
-
 import type { Opportunity, Category, Sponsor } from './types';
-import { Briefcase, Cpu, GraduationCap, HeartPulse, Cog, Paintbrush, Building } from 'lucide-react';
+import { Briefcase, Cpu, GraduationCap, HeartPulse, Cog, Paintbrush } from 'lucide-react';
 
+// ✅ دسته‌بندی‌ها
 export const categories: Category[] = [
   { name: 'Technology', slug: 'technology', icon: Cpu },
   { name: 'Business', slug: 'business', icon: Briefcase },
@@ -11,225 +11,28 @@ export const categories: Category[] = [
   { name: 'Arts & Design', slug: 'arts-design', icon: Paintbrush },
 ];
 
+// ✅ اسپانسرها
 export const sponsors: Sponsor[] = [
-    { name: 'Innovatech', logoUrl: 'https://placehold.co/150x50/e0e0e0/000?text=Innovatech' },
-    { name: 'Future Leaders Foundation', logoUrl: 'https://placehold.co/150x50/e0e0e0/000?text=Future+Leaders' },
-    { name: 'Creative Solutions', logoUrl: 'https://placehold.co/150x50/e0e0e0/000?text=Creative+Solutions' },
-    { name: 'DataDriven Inc.', logoUrl: 'https://placehold.co/150x50/e0e0e0/000?text=DataDriven' },
-    { name: 'Growth Gurus', logoUrl: 'https://placehold.co/150x50/e0e0e0/000?text=Growth+Gurus' },
-    { name: 'ServerSide Co.', logoUrl: 'https://placehold.co/150x50/e0e0e0/000?text=ServerSide' },
-]
-
-export const opportunities: Opportunity[] = [
-  {
-    id: '1',
-    title: 'Senior Frontend Developer',
-    organization: 'Innovatech',
-    type: 'Job',
-    location: 'Remote',
-    description: 'Seeking an experienced Frontend Developer to build and maintain our web applications using React and Next.js.',
-    url: '#',
-    featured: true,
-    logoUrl: 'https://placehold.co/100x100/e0e0e0/000?text=I',
-    category: 'Technology',
-    closingDate: '2024-12-31',
-    responsibilities: [
-      'Develop and maintain user-facing features using React and Next.js.',
-      'Build reusable components and front-end libraries for future use.',
-      'Translate designs and wireframes into high-quality code.',
-      'Optimize components for maximum performance across a vast array of web-capable devices and browsers.',
-    ],
-    qualifications: [
-      'Bachelor\'s degree in Computer Science or a related field.',
-      '5+ years of professional experience in frontend development.',
-      'Strong proficiency in JavaScript, TypeScript, React, and Next.js.',
-      'Experience with state management libraries like Redux or Zustand.',
-      'Familiarity with RESTful APIs and modern authorization mechanisms.',
-    ],
-    postDate: '2024-08-01',
-    reference: 'DEV-001',
-    numberOfVacancies: 1,
-    salaryRange: 'Negotiable',
-    yearsOfExperience: '5+ Years',
-    probationPeriod: '3 Months',
-    contractType: 'Full-time',
-    contractDuration: 'Permanent',
-    contractExtensible: false,
-    minimumEducation: 'Bachelor\'s Degree',
-    gender: 'Any',
-    functionalArea: 'Web Development',
-    countries: ['Global'],
-    submissionEmail: 'apply@innovatech.com',
-  },
-  {
-    id: '2',
-    title: 'Tech for Tomorrow Scholarship',
-    organization: 'Future Leaders Foundation',
-    type: 'Scholarship',
-    location: 'USA',
-    description: 'A scholarship for underprivileged students pursuing a degree in computer science or related fields.',
-    url: '#',
-    featured: true,
-    logoUrl: 'https://placehold.co/100x100/e0e0e0/000?text=F',
-    category: 'Technology',
-    closingDate: '2024-10-15',
-    eligibility: [
-      'Must be a full-time student at an accredited university.',
-      'Majoring in Computer Science, Software Engineering, or a related technical field.',
-      'Demonstrated financial need.',
-      'Must belong to an underrepresented group in the technology industry.',
-    ],
-    awardAmount: '$10,000 USD',
-  },
-  {
-    id: '3',
-    title: 'Product Design Intern',
-    organization: 'Creative Solutions',
-    type: 'Internship',
-    location: 'New York, NY',
-    description: 'A summer internship for students passionate about user experience and interface design.',
-    url: '#',
-    featured: true,
-    logoUrl: 'https://placehold.co/100x100/e0e0e0/000?text=C',
-    category: 'Arts & Design',
-    closingDate: '2025-03-01',
-  },
-  {
-    id: '4',
-    title: 'Data Scientist',
-    organization: 'DataDriven Inc.',
-    type: 'Job',
-    location: 'San Francisco, CA',
-    description: 'Join our team of data scientists to analyze large datasets and generate valuable insights for our clients.',
-    url: '#',
-    logoUrl: 'https://placehold.co/100x100/e0e0e0/000?text=D',
-    category: 'Technology',
-  },
-  {
-    id: '5',
-    title: 'Women in STEM Grant',
-    organization: 'STEMinist Org',
-    type: 'Scholarship',
-    location: 'International',
-    description: 'A grant to support women who are pursuing higher education and careers in STEM fields.',
-    url: '#',
-    logoUrl: 'https://placehold.co/100x100/e0e0e0/000?text=S',
-    category: 'Engineering',
-    eligibility: [
-      'Identify as a woman.',
-      'Be enrolled or accepted for enrollment in a full-time undergraduate or graduate program in a STEM field.',
-      'Demonstrate a commitment to pursuing a career in STEM.',
-      'Have a strong academic record.',
-    ],
-    awardAmount: '$5,000 research grant',
-  },
-  {
-    id: '6',
-    title: 'Marketing Intern',
-    organization: 'Growth Gurus',
-    type: 'Internship',
-    location: 'Remote',
-    description: 'An opportunity to learn about digital marketing, content creation, and SEO from industry experts.',
-    url: '#',
-    logoUrl: 'https://placehold.co/100x100/e0e0e0/000?text=G',
-    category: 'Business',
-    closingDate: '2024-11-20',
-  },
-  {
-    id: '7',
-    title: 'Backend Engineer (Node.js)',
-    organization: 'ServerSide Co.',
-    type: 'Job',
-    location: 'Austin, TX',
-    description: 'Develop and manage server-side logic and APIs for our suite of software products.',
-    url: '#',
-    logoUrl: 'https://placehold.co/100x100/e0e0e0/000?text=S',
-    category: 'Technology',
-  },
-  {
-    id: '8',
-    title: 'First Generation Scholars Program',
-    organization: 'Education Access Initiative',
-    type: 'Scholarship',
-    location: 'Canada',
-    description: 'Financial aid and mentorship for first-generation college students.',
-    url: '#',
-    featured: true,
-    logoUrl: 'https://placehold.co/100x100/e0e0e0/000?text=E',
-    category: 'Education',
-  },
-  {
-    id: '9',
-    title: 'Registered Nurse',
-    organization: 'City General Hospital',
-    type: 'Job',
-    location: 'Kabul, AF',
-    description: 'Provide high-quality patient care in a dynamic hospital environment.',
-    url: '#',
-    featured: true,
-    logoUrl: 'https://placehold.co/100x100/e0e0e0/000?text=C',
-    category: 'Healthcare',
-    closingDate: '2024-12-01',
-    responsibilities: [
-      'Assess patient health problems and needs, develop and implement nursing care plans.',
-      'Maintain medical records.',
-      'Administer nursing care to ill, injured, convalescent, or disabled patients.',
-      'Advise patients on health maintenance and disease prevention.',
-    ],
-    qualifications: [
-      'Associate\'s or Bachelor\'s degree in nursing.',
-      'Valid nursing license in the country of employment.',
-      'Minimum of 2 years of experience in a hospital setting.',
-      'Excellent communication and interpersonal skills.',
-    ],
-    postDate: '2024-07-20',
-    reference: 'NURSE-023',
-    numberOfVacancies: 5,
-    salaryRange: '$55,000 - $75,000 per year',
-    yearsOfExperience: '2 Years',
-    probationPeriod: '6 Months',
-    contractType: 'Full-time',
-    contractDuration: '2 Years',
-    contractExtensible: true,
-    minimumEducation: 'Associate\'s Degree',
-    gender: 'Any',
-    functionalArea: 'Patient Care',
-    countries: ['Afghanistan'],
-    submissionEmail: 'hr@cityhospital.com',
-  },
-  {
-    id: '10',
-    title: 'Civil Engineering Scholarship',
-    organization: 'Build The Future Org',
-    type: 'Scholarship',
-    location: 'Germany',
-    description: 'Scholarship for students studying civil engineering at a German university.',
-    url: '#',
-    logoUrl: 'https://placehold.co/100x100/e0e0e0/000?text=B',
-    category: 'Engineering',
-  },
-  {
-    id: '11',
-    title: 'Business Analyst',
-    organization: 'Commerce Corp',
-    type: 'Job',
-    location: 'Mazar-i-Sharif, AF',
-    description: 'Analyze business processes and make recommendations for improvement.',
-    url: '#',
-    logoUrl: 'https://placehold.co/100x100/e0e0e0/000?text=C',
-    category: 'Business',
-  },
-  {
-    id: '12',
-    title: 'Arts & Culture Grant',
-    organization: 'Creative Heritage Fund',
-    type: 'Scholarship',
-    location: 'Turkey',
-    description: 'A grant for artists and researchers focusing on cultural preservation.',
-    url: '#',
-    featured: true,
-    logoUrl: 'https://placehold.co/100x100/e0e0e0/000?text=C',
-    category: 'Arts & Design',
-    closingDate: '2025-01-31',
-  },
+  { name: 'Innovatech', logoUrl: 'https://placehold.co/150x50/e0e0e0/000?text=Innovatech' },
+  { name: 'Future Leaders Foundation', logoUrl: 'https://placehold.co/150x50/e0e0e0/000?text=Future+Leaders' },
+  { name: 'Creative Solutions', logoUrl: 'https://placehold.co/150x50/e0e0e0/000?text=Creative+Solutions' },
+  { name: 'DataDriven Inc.', logoUrl: 'https://placehold.co/150x50/e0e0e0/000?text=DataDriven' },
+  { name: 'Growth Gurus', logoUrl: 'https://placehold.co/150x50/e0e0e0/000?text=Growth+Gurus' },
+  { name: 'ServerSide Co.', logoUrl: 'https://placehold.co/150x50/e0e0e0/000?text=ServerSide' },
 ];
+
+// ✅ گرفتن فرصت‌ها از بک‌اند
+export async function fetchOpportunities(): Promise<Opportunity[]> {
+  try {
+    const res = await fetch("http://localhost:5071/api/post/posts", {
+      cache: "no-store", // همیشه تازه بیاره
+    });
+
+    if (!res.ok) throw new Error("Failed to fetch opportunities");
+
+    return await res.json();
+  } catch (error) {
+    console.error("❌ Error fetching opportunities:", error);
+    return [];
+  }
+}

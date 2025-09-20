@@ -34,12 +34,12 @@ export default function JobSeekerSignupPage() {
         lastName,
         email,
         password,
+        role: "User", // fixed role for job seekers
         phoneNumber: phone,
       }),
     });
 
     const data = await res.json();
-    console.log(data);
 
     if (res.ok) {
       // بعد از ثبت‌نام موفق، به صفحه verify-account ریدایرکت کن

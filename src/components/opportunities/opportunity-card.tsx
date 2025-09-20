@@ -1,9 +1,7 @@
-
 import Link from 'next/link';
 import { Briefcase, GraduationCap, MapPin, Building, Star, Calendar, Tag } from 'lucide-react';
 import type { Opportunity } from '@/lib/types';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
@@ -14,21 +12,33 @@ const typeIcons: Record<Opportunity['type'], React.ReactNode> = {
 };
 
 export function OpportunityCard({ opportunity }: { opportunity: Opportunity }) {
+  const orgName = opportunity.organization || 'Unknown';
+  const firstLetter = orgName.charAt(0).toUpperCase();
+
   return (
     <Link href={`/opportunities/${opportunity.id}`} className="group block">
       <Card className="flex flex-col h-full bg-secondary border-border transition-all duration-300 hover:border-primary hover:shadow-2xl hover:shadow-primary/10 hover:-translate-y-1">
         <CardHeader className="flex-row items-start gap-4 space-y-0 pb-4">
           <Avatar className="h-14 w-14 rounded-lg border-2 border-border bg-white">
-            <AvatarImage src={opportunity.logoUrl} alt={`${opportunity.organization} logo`} className="object-contain p-1" />
-            <AvatarFallback className="rounded-lg bg-secondary text-lg font-semibold">{opportunity.organization.charAt(0)}</AvatarFallback>
+            {opportunity.logoUrl ? (
+              <AvatarImage
+                src={opportunity.logoUrl}
+                alt={`${orgName} logo`}
+                className="object-contain p-1"
+              />
+            ) : (
+              <AvatarFallback className="rounded-lg bg-secondary text-lg font-semibold">
+                {firstLetter}
+              </AvatarFallback>
+            )}
           </Avatar>
           <div className="flex-1">
               <h3 className="text-lg font-semibold font-headline leading-tight text-foreground">
-                {opportunity.title}
+                {opportunity.title || 'Untitled'}
               </h3>
               <p className="text-sm text-muted-foreground mt-1 flex items-center gap-2">
                 <Building className="h-4 w-4" />
-                {opportunity.organization}
+                {orgName}
               </p>
           </div>
           {opportunity.featured && (
@@ -41,15 +51,15 @@ export function OpportunityCard({ opportunity }: { opportunity: Opportunity }) {
           <div className="flex flex-wrap gap-2 text-sm">
             <Badge variant="secondary" className="flex items-center gap-1.5">
               {typeIcons[opportunity.type]}
-              {opportunity.type}
+              {opportunity.type || 'Unknown'}
             </Badge>
             <Badge variant="secondary" className="flex items-center gap-1.5">
               <MapPin className="h-4 w-4" />
-              {opportunity.location}
+              {opportunity.location || 'Unknown'}
             </Badge>
             <Badge variant="secondary" className="flex items-center gap-1.5">
               <Tag className="h-4 w-4" />
-              {opportunity.category}
+              {opportunity.category || 'Uncategorized'}
             </Badge>
           </div>
           {opportunity.closingDate && (

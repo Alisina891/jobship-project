@@ -1,58 +1,186 @@
 "use client";
 import { useState, useMemo, useEffect, useRef } from "react";
 import Image from "next/image";
-import { Image as ImageIcon } from "lucide-react";
+import { User as UserIcon, Mail, MapPin, Phone, Calendar, Globe, MessageSquare } from "lucide-react";
+
+
 
 interface BackendUser {
-  Id: number;
+  id: number;
   firstName: string;
   lastName: string;
   email: string;
   role?: string;
   phoneNumber?: string;
   imageUrl?: string;
-  // توصیه می‌شود در بک‌اند این فیلد را ذخیره کنید:
   cloudinaryPublicId?: string;
 }
 
+interface Job {
+  id: number;
+  title: string;
+  company: string;
+  location: string;
+  date: string;
+  status: string;
+}
+
+interface Feedback {
+  id: number;
+  from: string;
+  message: string;
+  date: string;
+  rating: number;
+}
+
 export default function ProfilePage() {
-  const [details, setDetails] = useState<any | null>(null);
-  const [showModal, setShowModal] = useState(false);
   const [user, setUser] = useState<BackendUser | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  // --- برای آپلود عکس ---
+  const [details, setDetails] = useState<any>(null);
+  const [showModal, setShowModal] = useState(false);
+
   const [newImage, setNewImage] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const [imageUrl, setImageUrl] = useState('');
 
-  // Tabs
-  const tabs = [
-    "Profile",
-    "Resume Templates",
-    "Saved Jobs",
-    "Applied Jobs",
-    "My Feedbacks",
-  ] as const;
+  const tabs = ["Profile", "Resume Templates", "Saved Jobs", "Applied Jobs", "My Feedbacks"] as const;
   type Tab = typeof tabs[number];
   const [activeTab, setActiveTab] = useState<Tab>("Profile");
   const activeIndex = useMemo(() => tabs.indexOf(activeTab), [activeTab]);
 
-  // فرم داده‌ها
   const [gender, setGender] = useState("");
   const [dob, setDob] = useState("");
   const [nationality, setNationality] = useState("");
   const [languages, setLanguages] = useState<string[]>([]);
 
-  const toggleLanguage = (lang: string) => {
-    if (languages.includes(lang)) {
-      setLanguages(languages.filter((l) => l !== lang));
-    } else if (languages.length < 5) {
-      setLanguages([...languages, lang]);
+  // Mock data for demonstration
+  const [savedJobs, setSavedJobs] = useState<Job[]>([
+    { id: 1, title: "Frontend Developer", company: "Tech Solutions Inc.", location: "Kabul, Afghanistan", date: "2023-10-15", status: "Saved" },
+    { id: 2, title: "UI/UX Designer", company: "Creative Agency", location: "Remote", date: "2023-10-10", status: "Saved" },
+  ]);
+
+  const [appliedJobs, setAppliedJobs] = useState<Job[]>([
+    { id: 1, title: "Full Stack Developer", company: "Software House", location: "Kabul, Afghanistan", date: "2023-10-05", status: "In Review" },
+    { id: 2, title: "Backend Engineer", company: "Data Systems", location: "Remote", date: "2023-09-28", status: "Rejected" },
+    { id: 3, title: "Product Manager", company: "Tech Startup", location: "Herat, Afghanistan", date: "2023-09-20", status: "Interview" },
+  ]);
+
+  const [feedbacks, setFeedbacks] = useState<Feedback[]>([
+    { id: 1, from: "Tech Solutions Inc.", message: "Excellent candidate with strong technical skills.", date: "2023-10-12", rating: 4.5 },
+    { id: 2, from: "Creative Agency", message: "Impressive portfolio and creative thinking.", date: "2023-09-30", rating: 4.0 },
+  ]);
+
+  const resumeTemplates = [
+    { id: 1, name: "Modern Professional", description: "Clean and professional design", category: "Professional" },
+    { id: 2, name: "Creative", description: "For creative industries", category: "Creative" },
+    { id: 3, name: "Minimalist", description: "Simple and elegant", category: "Minimalist" },
+    { id: 4, name: "Executive", description: "For experienced professionals", category: "Professional" },
+  ];
+   
+  // --- Fetch User ---
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      setError("The user did not login before");
+      setLoading(false);
+      return;
     }
+
+    fetch("http://localhost:5071/api/auth/me", {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+      .then(async (res) => {
+        if (!res.ok) {
+          const data = await res.json().catch(() => ({}));
+          throw new Error(data.message || "Error when finding the profile");
+        }
+        
+        return res.json();
+      })
+      .then((data) => {
+  console.log("Profile response:", data);
+  setUser(data);
+})
+
+      .catch((err) => setError(err.message))
+      .finally(() => setLoading(false));
+      
+  }, []);
+
+  // --- Upload Functions ---
+  const triggerFilePicker = () => fileInputRef.current?.click();
+
+  const onFileChange: React.ChangeEventHandler<HTMLInputElement> = (e) => {
+    const file = e.target.files?.[0] || null;
+    setNewImage(file);
+    setUploadError(null);
+
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => setPreviewUrl(reader.result as string);
+      reader.readAsDataURL(file);
+    } else {
+      setPreviewUrl(null);
+    }
+  };
+
+  const handleUpload = async () => {
+    if (!newImage) return alert("Please select a file first!");
+    
+    setUploading(true);
+    setUploadError(null);
+    
+    const formData = new FormData();
+    formData.append("file", newImage);
+
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) throw new Error("No authentication token found");
+      
+      const res = await fetch("http://localhost:5071/api/Upload/UploadImage", {
+        method: "POST",
+        body: formData,
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!res.ok) {
+        const errorText = await res.text();
+        throw new Error(errorText || "Upload failed");
+      }
+      
+      const data = await res.json();
+      setImageUrl(`http://localhost:5071${data.fileUrl}`);
+      
+      // Update user data with new image URL
+      if (user) {
+        setUser({
+          ...user,
+          imageUrl: data.fileUrl
+        });
+      }
+      
+      // Reset states after successful upload
+      setNewImage(null);
+      setPreviewUrl(null);
+      alert("Image uploaded successfully!");
+    } catch (err: any) {
+      console.error(err);
+      setUploadError(err.message || "Upload failed. Please try again.");
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const toggleLanguage = (lang: string) => {
+    if (languages.includes(lang)) setLanguages(languages.filter((l) => l !== lang));
+    else if (languages.length < 5) setLanguages([...languages, lang]);
   };
 
   const handleSave = () => {
@@ -68,207 +196,105 @@ export default function ProfilePage() {
     setActiveTab(tabs[next]);
   };
 
-  // -------------------- FETCH USER --------------------
-  useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (!token) {
-      setError("کاربر لاگین نکرده است");
-      setLoading(false);
-      return;
-    }
+  const handleRemoveSavedJob = (id: number) => {
+    setSavedJobs(savedJobs.filter(job => job.id !== id));
+  };
 
-    fetch("http://localhost:5071/api/auth/me", {
-      headers: { Authorization: `Bearer ${token}` },
-    })
-      .then(async (res) => {
-        if (!res.ok) {
-          const data = await res.json().catch(() => ({}));
-          throw new Error(data.message || "خطا در دریافت پروفایل");
-        }
-        return res.json();
-      })
-      .then((data: BackendUser) => setUser(data))
-      .catch((err) => setError(err.message))
-      .finally(() => setLoading(false));
-  }, []);
-  // ------------------------------------------------------
+  const handleRemoveAppliedJob = (id: number) => {
+    setAppliedJobs(appliedJobs.filter(job => job.id !== id));
+  };
 
-  // استخراج public_id از URL در صورت نبود فیلد publicId
-  function extractPublicIdFromUrl(url?: string | null): string | null {
-    if (!url) return null;
-    try {
-      const u = new URL(url);
-      const parts = u.pathname.split("/"); // e.g. /image/upload/v1723456789/profile_pics/abc123.jpg
-      const vIndex = parts.findIndex((p) => /^v\d+$/.test(p));
-      if (vIndex === -1) return null;
-      const publicWithExt = parts.slice(vIndex + 1).join("/"); // profile_pics/abc123.jpg
-      const dot = publicWithExt.lastIndexOf(".");
-      const withoutExt = dot >= 0 ? publicWithExt.slice(0, dot) : publicWithExt;
-      return decodeURIComponent(withoutExt); // profile_pics/abc123
-    } catch {
-      return null;
-    }
-  }
-
-  const triggerFilePicker = () => fileInputRef.current?.click();
-
-  const onFileChange: React.ChangeEventHandler<HTMLInputElement> = (e) => {
-    const f = e.target.files?.[0] || null;
-    setNewImage(f);
-    setUploadError(null);
-    if (f) {
-      const reader = new FileReader();
-      reader.onloadend = () => setPreviewUrl(reader.result as string);
-      reader.readAsDataURL(f);
-    } else {
-      setPreviewUrl(null);
+  const getStatusColor = (status: string) => {
+    switch (status.toLowerCase()) {
+      case "in review": return "bg-blue-100 text-blue-800";
+      case "interview": return "bg-purple-100 text-purple-800";
+      case "rejected": return "bg-red-100 text-red-800";
+      case "accepted": return "bg-green-100 text-green-800";
+      default: return "bg-gray-100 text-gray-800";
     }
   };
 
-  const handleUpload = async () => {
-    if (!newImage || !user) return;
-    setUploading(true);
-    setUploadError(null);
-
-    try {
-      // اگر previewUrl از FileReader داریم، همان را می‌فرستیم (base64)
-      const imageBase64 = previewUrl;
-      if (!imageBase64) throw new Error("پیش‌نمایش تصویر در دسترس نیست.");
-
-      // ترجیحاً publicId را از DB بگیرید، در غیراینصورت از URL استخراج می‌کنیم:
-      const oldPublicId =
-        user.cloudinaryPublicId || extractPublicIdFromUrl(user.imageUrl);
-
-      // 1) آپلود به API داخلی Next.js (Cloudinary)
-      const res = await fetch("/api/upload", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ image: imageBase64, oldPublicId }),
-      });
-
-      const data = await res.json();
-      if (!res.ok) throw new Error(data?.error || "Could not upload");
-
-      const { url, public_id } = data as { url: string; public_id: string };
-
-      // 2) ذخیره‌ی url و public_id در بک‌اند شما (ASP.NET Core)
-      const token = localStorage.getItem("token");
-      if (!token) throw new Error("Can't catch the token please try again");
-
-      const saveRes = await fetch(
-        "http://localhost:5071/api/auth/updateProfilePic",
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({ imageUrl: url, publicId: public_id }),
-        }
-      );
-
-      if (!saveRes.ok) {
-        const saveErr = await saveRes.json().catch(() => ({}));
-        throw new Error(saveErr?.message || "ثبت تصویر در سرور ناموفق بود.");
-      }
-
-      // 3) به‌روزرسانی UI
-      setUser((prev) =>
-        prev ? { ...prev, imageUrl: url, cloudinaryPublicId: public_id } : prev
-      );
-      setNewImage(null);
-      setPreviewUrl(null);
-    } catch (e: any) {
-      setUploadError(e?.message || "مشکلی پیش آمد.");
-    } finally {
-      setUploading(false);
-    }
-  };
-
-  if (loading) return <p className="p-4">در حال بارگذاری...</p>;
-  if (error) return <p className="p-4 text-red-500">{error}</p>;
+  if (loading) return <div className="min-h-screen flex items-center justify-center"><p className="p-4">Loading...</p></div>;
+  if (error) return <div className="min-h-screen flex items-center justify-center"><p className="p-4 text-red-500">{error}</p></div>;
   if (!user) return null;
 
   return (
-    <div className="min-h-screen bg-background flex justify-center items-center text-foreground">
-      <div className="w-full">
+    <div className="min-h-screen bg-background flex justify-center items-start text-foreground p-4">
+      <div className="w-full max-w-7xl">
         {/* Cover */}
-        <div className="relative w-full h-72 sm:h-56 mt-1 max-w-screen-2xl">
-          <Image
-            src={previewUrl || user.imageUrl || "/img/sc.png"}
-            alt="Cover"
-            fill
-            className="object-cover px-8 rounded-sm"
-            // اگر Cloudinary را در next.config اجازه نداده‌اید، به بخش 4 مراجعه کنید
+        <div className="relative w-full h-72 sm:h-56 max-w-screen-2xl rounded-sm overflow-hidden">
+          <Image 
+            src="/img/sc.png" 
+            alt="Cover" 
+            fill 
+            className="object-cover" 
           />
-          <button
-            onClick={triggerFilePicker}
-            aria-label="Change cover photo"
-            className="absolute bottom-2 right-10 w-10 h-10 bg-background rounded-full shadow flex items-center justify-center hover:bg-accent transition"
-          >
-            <ImageIcon className="w-5 h-5 text-primary" aria-hidden="true" />
-            <span className="sr-only">Upload Image</span>
-          </button>
         </div>
 
-        {/* Layout */}
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 md:grid md:grid-cols-12 md:gap-6">
+        <div className="md:grid md:grid-cols-12 md:gap-6 mt-6">
           {/* Left Column */}
-          <div className="md:col-span-4">
-            {/* Profile Card */}
-            <div className="bg-background shadow-lg rounded-2xl p-6 flex flex-col items-center relative">
-              <div className="relative -mt-24 w-32 h-32 sm:w-40 sm:h-40">
+          <div className="md:col-span-4 flex flex-col items-center">
+            {/* Profile Picture */}
+            <div className="relative w-40 h-40 -mt-20">
+              {previewUrl || user.imageUrl ? (
                 <Image
-                  src={previewUrl || user.imageUrl || "/img/ali.jpg"}
+                  src={previewUrl || (user.imageUrl ? `http://localhost:5071${user.imageUrl}` : "/img/sc.png")}
                   alt="Profile Picture"
                   fill
                   className="object-cover rounded-full border-4 border-background shadow-lg"
                 />
-                <button
-                  onClick={triggerFilePicker}
-                  aria-label="Change profile photo"
-                  className="absolute bottom-2 right-2 w-10 h-10 bg-background rounded-full shadow flex items-center justify-center hover:bg-accent transition"
-                >
-                  <span className="text-primary font-bold" aria-hidden>
-                    ✎
-                  </span>
-                </button>
-              </div>
+              ) : (
+                <div className="w-full h-full flex items-center justify-center rounded-full border-4 border-background shadow-lg bg-muted-foreground text-background text-6xl">
+                  <UserIcon className="w-16 h-16" />
+                </div>
+              )}
 
-              <h1 className="mt-4 text-2xl sm:text-3xl font-bold text-foreground text-center">
-                {user.firstName} {user.lastName}
-              </h1>
-              <p className="text-primary pt-3">{user.email}</p>
-
-              {/* کنترل‌های آپلود */}
-              <input
-                ref={fileInputRef}
-                className="hidden"
-                type="file"
-                accept="image/*"
-                onChange={onFileChange}
+              <button
+                onClick={triggerFilePicker}
+                className="absolute bottom-0 right-0 w-10 h-10 bg-primary rounded-full flex items-center justify-center hover:bg-primary/90 transition"
+              >
+                ✎
+              </button>
+              <input 
+                ref={fileInputRef} 
+                type="file" 
+                accept="image/*" 
+                onChange={onFileChange} 
+                className="hidden" 
               />
-              
-
-              <div className="mt-6 flex flex-col gap-3 w-full max-w-xs">
-                <button className="w-full py-3 bg-primary hover:bg-primary/90 text-background rounded-full shadow-md transition">
-                  Edit Profile
-                </button>
-                <button
-                  onClick={() => setActiveTab("Resume Templates")}
-                  className="w-full py-3 bg-accent border border-primary text-primary rounded-full shadow-md transition"
-                >
-                  Build Resume
-                </button>
-              </div>
             </div>
 
-            {/* Details Section */}
-            <div className="bg-background shadow-md rounded-2xl p-6 mt-6">
+            {newImage && (
+              <div className="mt-4 flex flex-col items-center gap-2">
+                <button
+                  onClick={handleUpload}
+                  disabled={uploading}
+                  className="px-6 py-2 bg-accent text-background rounded-full hover:bg-accent/90 transition disabled:opacity-50"
+                >
+                  {uploading ? "Uploading..." : "Upload"}
+                </button>
+                {uploadError && <p className="text-red-500 text-sm">{uploadError}</p>}
+              </div>
+            )}
+
+            <h1 className="mt-4 text-2xl font-bold text-center">{user.firstName} {user.lastName}</h1>
+            <p className="text-primary pt-1">{user.email}</p>
+
+            <div className="mt-6 flex flex-col gap-3 w-full max-w-xs">
+              <button className="w-full py-3 bg-primary hover:bg-primary/90 text-background rounded-full shadow-md transition">
+                Edit Profile
+              </button>
+              <button
+                onClick={() => setActiveTab("Resume Templates")}
+                className="w-full py-3 bg-accent border border-primary text-primary rounded-full shadow-md transition"
+              >
+                Build Resume
+              </button>
+            </div>
+
+            <div className="bg-background shadow-md rounded-2xl p-6 mt-6 w-full">
               <div className="flex items-center justify-between mb-4">
-                <h2 className="text-lg sm:text-xl font-semibold text-foreground">
-                  Details
-                </h2>
+                <h2 className="text-lg sm:text-xl font-semibold text-foreground">Details</h2>
                 <button
                   onClick={() => setShowModal(true)}
                   className="px-3 py-1 bg-primary hover:bg-primary/90 text-background rounded-lg text-sm font-medium transition"
@@ -319,78 +345,211 @@ export default function ProfilePage() {
                 })}
               </div>
 
-              {/* Tab Panels */}
               <div className="p-6">
                 {activeTab === "Profile" && (
-                  <section className="space-y-4">
-                    <h2 className="text-xl font-semibold text-foreground">
-                      Profile Overview
-                    </h2>
-                    <p className="text-muted-foreground">
-                      Quick overview of your profile.
-                    </p>
+                  <section className="space-y-6">
+                    <h2 className="text-xl font-semibold text-foreground">Profile Overview</h2>
+                    <p className="text-muted-foreground">Quick overview of your profile.</p>
+                    
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                      <div className="rounded-xl border border-border p-4">
-                        <p className="text-sm text-muted-foreground">Full Name</p>
-                        <p className="font-medium text-foreground">
-                          {user.firstName} {user.lastName}
-                        </p>
+                      <div className="rounded-xl border border-border p-4 flex items-start gap-3">
+                        <div className="bg-primary/10 p-2 rounded-full">
+                          <Mail className="w-5 h-5 text-primary" />
+                        </div>
+                        <div>
+                          <p className="text-sm text-muted-foreground">Email</p>
+                          <p className="font-medium text-foreground">{user.email}</p>
+                        </div>
                       </div>
-                      <div className="rounded-xl border border-border p-4">
-                        <p className="text-sm text-muted-foreground">Email</p>
-                        <p className="font-medium text-foreground">{user.email}</p>
+                      
+                      <div className="rounded-xl border border-border p-4 flex items-start gap-3">
+                        <div className="bg-primary/10 p-2 rounded-full">
+                          <Phone className="w-5 h-5 text-primary" />
+                        </div>
+                        <div>
+                          <p className="text-sm text-muted-foreground">Phone</p>
+                          <p className="font-medium text-foreground">{user.phoneNumber || "Not provided"}</p>
+                        </div>
                       </div>
-                      <div className="rounded-xl border border-border p-4">
-                        <p className="text-sm text-muted-foreground">Location</p>
-                        <p className="font-medium text-foreground">
-                          Kabul, Afghanistan
-                        </p>
+                      
+                      <div className="rounded-xl border border-border p-4 flex items-start gap-3">
+                        <div className="bg-primary/10 p-2 rounded-full">
+                          <MapPin className="w-5 h-5 text-primary" />
+                        </div>
+                        <div>
+                          <p className="text-sm text-muted-foreground">Location</p>
+                          <p className="font-medium text-foreground">Kabul, Afghanistan</p>
+                        </div>
                       </div>
+                    </div>
+
+                    <div className="mt-6">
+                      <h3 className="text-lg font-semibold text-foreground mb-4">About Me</h3>
+                      <p className="text-muted-foreground">
+                        Passionate developer with experience in building modern web applications. 
+                        Always eager to learn new technologies and solve challenging problems.
+                      </p>
                     </div>
                   </section>
                 )}
 
                 {activeTab === "Resume Templates" && (
                   <section>
-                    <h2 className="text-xl font-semibold text-foreground">
-                      Resume Templates
-                    </h2>
-                    <p className="text-muted-foreground">
-                      Choose a template to build your resume.
-                    </p>
+                    <h2 className="text-xl font-semibold text-foreground mb-4">Resume Templates</h2>
+                    <p className="text-muted-foreground mb-6">Choose a template to build your resume.</p>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      {resumeTemplates.map(template => (
+                        <div key={template.id} className="border border-border rounded-lg overflow-hidden hover:shadow-md transition-shadow">
+                          <div className="h-40 bg-gradient-to-r from-blue-50 to-purple-50 flex items-center justify-center">
+                            <div className="text-center">
+                              <div className="w-16 h-20 bg-white border border-border mx-auto mb-2"></div>
+                              <span className="text-xs text-muted-foreground">Preview</span>
+                            </div>
+                          </div>
+                          <div className="p-4">
+                            <h3 className="font-semibold text-foreground">{template.name}</h3>
+                            <p className="text-sm text-muted-foreground mt-1">{template.description}</p>
+                            <div className="flex justify-between items-center mt-4">
+                              <span className="text-xs px-2 py-1 bg-accent text-primary rounded-full">{template.category}</span>
+                              <button className="px-4 py-2 bg-primary text-background rounded-lg text-sm hover:bg-primary/90 transition">
+                                Use Template
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
                   </section>
                 )}
 
                 {activeTab === "Saved Jobs" && (
                   <section>
-                    <h2 className="text-xl font-semibold text-foreground">
-                      Saved Jobs
-                    </h2>
-                    <p className="text-muted-foreground">
-                      Jobs you saved to review later.
-                    </p>
+                    <h2 className="text-xl font-semibold text-foreground mb-4">Saved Jobs</h2>
+                    <p className="text-muted-foreground mb-6">Jobs you saved to review later.</p>
+                    
+                    {savedJobs.length === 0 ? (
+                      <div className="text-center py-10">
+                        <div className="bg-accent/20 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                          <MessageSquare className="w-8 h-8 text-primary" />
+                        </div>
+                        <h3 className="font-medium text-foreground">No saved jobs yet</h3>
+                        <p className="text-muted-foreground mt-1">Start browsing jobs and save them for later.</p>
+                      </div>
+                    ) : (
+                      <div className="space-y-4">
+                        {savedJobs.map(job => (
+                          <div key={job.id} className="border border-border rounded-lg p-4 hover:shadow-md transition-shadow">
+                            <div className="flex justify-between items-start">
+                              <div>
+                                <h3 className="font-semibold text-foreground">{job.title}</h3>
+                                <p className="text-muted-foreground mt-1">{job.company} • {job.location}</p>
+                                <p className="text-sm text-muted-foreground mt-2">Saved on {job.date}</p>
+                              </div>
+                              <div className="flex gap-2">
+                                <button className="px-3 py-1 bg-primary text-background rounded-lg text-sm hover:bg-primary/90 transition">
+                                  Apply Now
+                                </button>
+                                <button 
+                                  onClick={() => handleRemoveSavedJob(job.id)}
+                                  className="px-3 py-1 border border-border rounded-lg text-sm hover:bg-accent/10 transition"
+                                >
+                                  Remove
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </section>
                 )}
 
                 {activeTab === "Applied Jobs" && (
                   <section>
-                    <h2 className="text-xl font-semibold text-foreground">
-                      Applied Jobs
-                    </h2>
-                    <p className="text-muted-foreground">
-                      Track your applications here.
-                    </p>
+                    <h2 className="text-xl font-semibold text-foreground mb-4">Applied Jobs</h2>
+                    <p className="text-muted-foreground mb-6">Track your applications here.</p>
+                    
+                    {appliedJobs.length === 0 ? (
+                      <div className="text-center py-10">
+                        <div className="bg-accent/20 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                          <Calendar className="w-8 h-8 text-primary" />
+                        </div>
+                        <h3 className="font-medium text-foreground">No applications yet</h3>
+                        <p className="text-muted-foreground mt-1">Start applying to jobs to track your progress here.</p>
+                      </div>
+                    ) : (
+                      <div className="space-y-4">
+                        {appliedJobs.map(job => (
+                          <div key={job.id} className="border border-border rounded-lg p-4 hover:shadow-md transition-shadow">
+                            <div className="flex justify-between items-start">
+                              <div>
+                                <h3 className="font-semibold text-foreground">{job.title}</h3>
+                                <p className="text-muted-foreground mt-1">{job.company} • {job.location}</p>
+                                <div className="flex items-center gap-3 mt-2">
+                                  <span className="text-sm text-muted-foreground">Applied on {job.date}</span>
+                                  <span className={`text-xs px-2 py-1 rounded-full ${getStatusColor(job.status)}`}>
+                                    {job.status}
+                                  </span>
+                                </div>
+                              </div>
+                              <button 
+                                onClick={() => handleRemoveAppliedJob(job.id)}
+                                className="px-3 py-1 border border-border rounded-lg text-sm hover:bg-accent/10 transition"
+                              >
+                                Remove
+                              </button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </section>
                 )}
 
                 {activeTab === "My Feedbacks" && (
                   <section>
-                    <h2 className="text-xl font-semibold text-foreground">
-                      My Feedbacks
-                    </h2>
-                    <p className="text-muted-foreground">
-                      Feedbacks you have received.
-                    </p>
+                    <h2 className="text-xl font-semibold text-foreground mb-4">My Feedbacks</h2>
+                    <p className="text-muted-foreground mb-6">Feedbacks you have received.</p>
+                    
+                    {feedbacks.length === 0 ? (
+                      <div className="text-center py-10">
+                        <div className="bg-accent/20 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                          <MessageSquare className="w-8 h-8 text-primary" />
+                        </div>
+                        <h3 className="font-medium text-foreground">No feedback yet</h3>
+                        <p className="text-muted-foreground mt-1">You'll see feedback from employers here.</p>
+                      </div>
+                    ) : (
+                      <div className="space-y-4">
+                        {feedbacks.map(feedback => (
+                          <div key={feedback.id} className="border border-border rounded-lg p-4 hover:shadow-md transition-shadow">
+                            <div className="flex justify-between items-start">
+                              <div>
+                                <h3 className="font-semibold text-foreground">{feedback.from}</h3>
+                                <div className="flex items-center gap-2 mt-2">
+                                  {[...Array(5)].map((_, i) => (
+                                    <div
+                                      key={i}
+                                      className={`w-5 h-5 rounded-full ${
+                                        i < Math.floor(feedback.rating)
+                                          ? "bg-yellow-400"
+                                          : "bg-gray-300"
+                                      }`}
+                                    />
+                                  ))}
+                                  <span className="text-sm text-muted-foreground ml-2">
+                                    {feedback.rating}/5
+                                  </span>
+                                </div>
+                                <p className="text-muted-foreground mt-3">{feedback.message}</p>
+                                <p className="text-sm text-muted-foreground mt-2">Received on {feedback.date}</p>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </section>
                 )}
               </div>
@@ -405,7 +564,6 @@ export default function ProfilePage() {
           <div className="bg-background rounded-2xl p-6 w-full max-w-lg shadow-lg text-foreground">
             <h2 className="text-xl font-bold text-foreground mb-4">Edit Details</h2>
 
-            {/* Gender */}
             <label className="block mb-2 font-medium text-foreground">Gender</label>
             <select
               value={gender}
@@ -418,7 +576,6 @@ export default function ProfilePage() {
               <option value="Other">Other</option>
             </select>
 
-            {/* Date of Birth */}
             <label className="block mb-2 font-medium text-foreground">Date of Birth</label>
             <input
               type="date"
@@ -427,7 +584,6 @@ export default function ProfilePage() {
               className="w-full border border-border rounded-lg px-3 py-2 mb-4 bg-background text-foreground"
             />
 
-            {/* Nationality */}
             <label className="block mb-2 font-medium text-foreground">Nationality</label>
             <input
               type="text"
@@ -436,30 +592,24 @@ export default function ProfilePage() {
               className="w-full border border-border rounded-lg px-3 py-2 mb-4 bg-background text-foreground"
             />
 
-            {/* Languages */}
-            <label className="block mb-2 font-medium text-foreground">
-              Choose Top 5 Languages
-            </label>
+            <label className="block mb-2 font-medium text-foreground">Choose Top 5 Languages</label>
             <div className="flex flex-wrap gap-2 mb-4">
-              {["English", "Persian", "Pashto", "Arabic", "German", "Turkish"].map(
-                (lang) => (
-                  <button
-                    key={lang}
-                    type="button"
-                    onClick={() => toggleLanguage(lang)}
-                    className={`px-3 py-1 rounded-full border ${
-                      languages.includes(lang)
-                        ? "bg-primary text-background"
-                        : "hover:bg-accent/10 text-foreground border-border"
-                    }`}
-                  >
-                    {lang}
-                  </button>
-                )
-              )}
+              {["English", "Persian", "Pashto", "Arabic", "German", "Turkish"].map((lang) => (
+                <button
+                  key={lang}
+                  type="button"
+                  onClick={() => toggleLanguage(lang)}
+                  className={`px-3 py-1 rounded-full border ${
+                    languages.includes(lang)
+                      ? "bg-primary text-background"
+                      : "hover:bg-accent/10 text-foreground border-border"
+                  }`}
+                >
+                  {lang}
+                </button>
+              ))}
             </div>
 
-            {/* Actions */}
             <div className="flex justify-end gap-3">
               <button
                 onClick={() => setShowModal(false)}
@@ -467,10 +617,7 @@ export default function ProfilePage() {
               >
                 Cancel
               </button>
-              <button
-                onClick={handleSave}
-                className="px-4 py-2 bg-primary text-background rounded-lg"
-              >
+              <button onClick={handleSave} className="px-4 py-2 bg-primary text-background rounded-lg">
                 Save
               </button>
             </div>
