@@ -82,6 +82,67 @@ export default function ProfilePage() {
     { id: 4, name: "Executive", description: "For experienced professionals", category: "Professional" },
   ];
    
+
+  const [showEditProfile, setShowEditProfile] = useState(false);
+  const [editFirstName, setEditFirstName] = useState(user?.firstName || "");
+  const [editLastName, setEditLastName] = useState(user?.lastName || "");
+  const [editEmail, setEditEmail] = useState(user?.email || "");
+  const [editPhone, setEditPhone] = useState(user?.phoneNumber || "");
+ const [showSuccessTickOutside, setShowSuccessTickOutside] = useState(false);
+
+
+
+  useEffect(() => {
+  if (user) {
+    setEditFirstName(user.firstName);
+    setEditLastName(user.lastName);
+    setEditEmail(user.email);
+    setEditPhone(user.phoneNumber || "");
+  }
+}, [user]);
+
+
+
+const handleProfileSave = async () => {
+  const token = localStorage.getItem("token");
+  if (token) {
+    try {
+      const res = await fetch("http://localhost:5071/api/auth/updateProfile", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          firstName: editFirstName,
+          lastName: editLastName,
+          email: editEmail,
+          phoneNumber: editPhone,
+        }),
+      });
+      if (!res.ok) throw new Error("Failed to update profile");
+
+      setUser((prev) => prev ? {
+        ...prev,
+        firstName: editFirstName,
+        lastName: editLastName,
+        email: editEmail,
+        phoneNumber: editPhone
+      } : null);
+
+      setShowEditProfile(false);
+
+      // نمایش تیک بیرون از مودال
+      setShowSuccessTickOutside(true);
+      setTimeout(() => setShowSuccessTickOutside(false), 3000);
+    } catch (err: any) {
+      console.error(err);
+    }
+  }
+};
+
+
+
   // --- Fetch User ---
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -280,10 +341,21 @@ export default function ProfilePage() {
             <h1 className="mt-4 text-2xl font-bold text-center">{user.firstName} {user.lastName}</h1>
             <p className="text-primary pt-1">{user.email}</p>
 
-            <div className="mt-6 flex flex-col gap-3 w-full max-w-xs">
-              <button className="w-full py-3 bg-primary hover:bg-primary/90 text-background rounded-full shadow-md transition">
+            <div className="relative w-full flex flex-col items-center gap-2">
+              <button
+                className="w-full py-3 bg-primary hover:bg-primary/90 text-background rounded-full shadow-md transition"
+                onClick={() => setShowEditProfile(true)}
+              >
                 Edit Profile
               </button>
+
+              {showSuccessTickOutside && (
+                <span className="absolute top-[10px] right-3 w-10 h-10 bg-red-500 rounded-full flex items-center justify-center text-white text-2xl shadow-lg animate-bounce">
+                  ✔
+                </span>
+
+              )}
+
               <button
                 onClick={() => setActiveTab("Resume Templates")}
                 className="w-full py-3 bg-accent border border-primary text-primary rounded-full shadow-md transition"
@@ -291,6 +363,7 @@ export default function ProfilePage() {
                 Build Resume
               </button>
             </div>
+
 
             <div className="bg-background shadow-md rounded-2xl p-6 mt-6 w-full">
               <div className="flex items-center justify-between mb-4">
@@ -624,6 +697,60 @@ export default function ProfilePage() {
           </div>
         </div>
       )}
+
+
+
+         {showEditProfile && (
+            <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+              <div className="bg-background rounded-2xl p-6 w-full max-w-md shadow-lg text-foreground">
+                <h2 className="text-xl font-bold mb-4">Edit Profile</h2>
+                
+                <label className="block mb-2">First Name</label>
+                <input
+                  value={editFirstName}
+                  onChange={(e) => setEditFirstName(e.target.value)}
+                  className="w-full border border-border rounded-lg px-3 py-2 mb-4"
+                />
+
+                <label className="block mb-2">Last Name</label>
+                <input
+                  value={editLastName}
+                  onChange={(e) => setEditLastName(e.target.value)}
+                  className="w-full border border-border rounded-lg px-3 py-2 mb-4"
+                />
+
+                <label className="block mb-2">Email</label>
+                <input
+                  value={editEmail}
+                  onChange={(e) => setEditEmail(e.target.value)}
+                  className="w-full border border-border rounded-lg px-3 py-2 mb-4"
+                />
+
+                <label className="block mb-2">Phone Number</label>
+                <input
+                  value={editPhone}
+                  onChange={(e) => setEditPhone(e.target.value)}
+                  className="w-full border border-border rounded-lg px-3 py-2 mb-4"
+                />
+
+                <div className="flex justify-end gap-3">
+                  <button
+                    onClick={() => setShowEditProfile(false)}
+                    className="px-4 py-2 border rounded-lg hover:bg-accent/10"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleProfileSave}
+                    className="px-4 py-2 bg-primary text-background rounded-lg"
+                  >
+                    Save
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
     </div>
   );
 }
