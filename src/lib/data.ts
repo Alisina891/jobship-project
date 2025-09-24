@@ -13,13 +13,14 @@ export const categories: Category[] = [
 
 // ✅ اسپانسرها
 export const sponsors: Sponsor[] = [
-  { name: 'Innovatech', logoUrl: 'https://placehold.co/150x50/e0e0e0/000?text=Innovatech' },
-  { name: 'Future Leaders Foundation', logoUrl: 'https://placehold.co/150x50/e0e0e0/000?text=Future+Leaders' },
-  { name: 'Creative Solutions', logoUrl: 'https://placehold.co/150x50/e0e0e0/000?text=Creative+Solutions' },
-  { name: 'DataDriven Inc.', logoUrl: 'https://placehold.co/150x50/e0e0e0/000?text=DataDriven' },
-  { name: 'Growth Gurus', logoUrl: 'https://placehold.co/150x50/e0e0e0/000?text=Growth+Gurus' },
-  { name: 'ServerSide Co.', logoUrl: 'https://placehold.co/150x50/e0e0e0/000?text=ServerSide' },
+  { name: 'Innovatech', logoUrl: 'https://placehold.co/150x50/e0e0e0/000.png?text=Innovatech' },
+  { name: 'Future Leaders Foundation', logoUrl: 'https://placehold.co/150x50/e0e0e0/000.png?text=Future+Leaders' },
+  { name: 'Creative Solutions', logoUrl: 'https://placehold.co/150x50/e0e0e0/000.png?text=Creative+Solutions' },
+  { name: 'DataDriven Inc.', logoUrl: 'https://placehold.co/150x50/e0e0e0/000.png?text=DataDriven' },
+  { name: 'Growth Gurus', logoUrl: 'https://placehold.co/150x50/e0e0e0/000.png?text=Growth+Gurus' },
+  { name: 'ServerSide Co.', logoUrl: 'https://placehold.co/150x50/e0e0e0/000.png?text=ServerSide' },
 ];
+
 
 // ✅ گرفتن فرصت‌ها از بک‌اند
 // ✅ گرفتن فرصت‌ها از بک‌اند با امکان سرچ
