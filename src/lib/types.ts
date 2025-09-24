@@ -33,8 +33,11 @@ export type Opportunity = {
   // Scholarship specific fields
   eligibility?: string[];
   awardAmount?: string;
-};
 
+  // Fields from backend
+  userId?: string;
+  createdAt?: string;
+};
 export type Category = {
   name: string;
   slug: string;

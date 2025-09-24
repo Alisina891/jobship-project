@@ -22,9 +22,16 @@ export const sponsors: Sponsor[] = [
 ];
 
 // ✅ گرفتن فرصت‌ها از بک‌اند
-export async function fetchOpportunities(): Promise<Opportunity[]> {
+// ✅ گرفتن فرصت‌ها از بک‌اند با امکان سرچ
+export async function fetchOpportunities(search?: string): Promise<Opportunity[]> {
   try {
-    const res = await fetch("http://localhost:5071/api/post/posts", {
+    // ساخت URL با پارامتر سرچ
+    const url = new URL("http://localhost:5071/api/post/posts");
+    if (search?.trim()) {
+      url.searchParams.append("search", search.trim());
+    }
+
+    const res = await fetch(url.toString(), {
       cache: "no-store", // همیشه تازه بیاره
     });
 
@@ -36,3 +43,4 @@ export async function fetchOpportunities(): Promise<Opportunity[]> {
     return [];
   }
 }
+

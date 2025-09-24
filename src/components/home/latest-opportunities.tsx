@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { fetchOpportunities } from '@/lib/data';
 import { OpportunityCard } from '@/components/opportunities/opportunity-card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -15,16 +16,20 @@ export function LatestOpportunities() {
   const [activeTab, setActiveTab] = useState<Opportunity['type'] | 'All'>('All');
   const [opportunities, setOpportunities] = useState<Opportunity[]>([]);
 
-  // 📌 گرفتن دیتا از بک‌اند
+  // 📌 گرفتن مقدار سرچ از URL
+  const searchParams = useSearchParams();
+  const searchTerm = searchParams.get('q') || '';
+
+  // 📌 گرفتن دیتا از بک‌اند با توجه به سرچ
   useEffect(() => {
     const loadData = async () => {
-      const data = await fetchOpportunities();
+      const data = await fetchOpportunities(searchTerm);
       setOpportunities(data);
     };
     loadData();
-  }, []);
+  }, [searchTerm]);
 
-  // 📌 فیلتر کردن دیتا
+  // 📌 فیلتر کردن دیتا برای Tabs
   const getFilteredOpportunities = (type: Opportunity['type'] | 'All') => {
     if (type === 'All') {
       return opportunities.slice(0, 8);

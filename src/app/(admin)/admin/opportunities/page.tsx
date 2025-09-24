@@ -1,10 +1,9 @@
-import type { Metadata } from 'next';
 import { fetchOpportunities } from '@/lib/data';
 import { OpportunitiesTable } from '@/components/admin/opportunities-table';
 
+export const dynamic = 'force-dynamic'; // اجبارا SSR
 
 export default async function ManageOpportunitiesPage() {
-  // حالا await کنید تا داده واقعی گرفته شود
   const initialData = await fetchOpportunities();
 
   return (

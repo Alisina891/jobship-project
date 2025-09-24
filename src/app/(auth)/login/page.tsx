@@ -9,6 +9,11 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { LogIn, Briefcase } from 'lucide-react';
 
+
+// Inside handleLogin after successful login:
+
+
+
 export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -30,6 +35,7 @@ export default function LoginPage() {
         // فقط ذخیره JWT در localStorage
         localStorage.setItem('token', data.token);
         localStorage.setItem('user', JSON.stringify(data.user));
+        
 
         // هدایت بر اساس نقش
         switch (data.user.role) {

@@ -1,4 +1,4 @@
-
+import { Suspense } from 'react';
 import { Hero } from '@/components/home/hero';
 import { LatestOpportunities } from '@/components/home/latest-opportunities';
 import { CtaSection } from '@/components/home/cta-section';
@@ -9,7 +9,9 @@ export default function Home() {
   return (
     <>
       <Hero />
-      <LatestOpportunities />
+      <Suspense fallback={<div>Loading opportunities...</div>}>
+        <LatestOpportunities />
+      </Suspense>
       <CtaSection />
       <ResumeBuilderCta />
       <TopSponsors />

@@ -1,24 +1,45 @@
+// مثال استفاده در صفحه Edit
+'use client';
 
-import { OpportunityForm } from '@/components/admin/opportunity-form';
-import { opportunities } from '@/lib/data';
-import { notFound } from 'next/navigation';
-import type { Metadata } from 'next';
+import { useEffect, useState } from 'react';
+import { useParams } from 'next/navigation';
+import { EditOpportunityForm } from '@/components/admin/editOpportunity-form';
+import { Opportunity } from '@/lib/types';
 
-export const metadata: Metadata = {
-    title: 'Edit Opportunity | Bepall Admin',
-};
+export default function EditOpportunityPage() {
+  const params = useParams();
+  const id = params.id as string;
+  const [opportunity, setOpportunity] = useState<Opportunity | null>(null);
+  const [loading, setLoading] = useState(true);
 
-export default function EditOpportunityPage({ params }: { params: { id: string } }) {
-    const opportunity = opportunities.find((op) => op.id === params.id);
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await fetch(`http://localhost:5071/api/Post/post/${id}`);
+        if (response.ok) {
+          const data = await response.json();
+          setOpportunity(data);
+        }
+      } catch (error) {
+        console.error('Error fetching opportunity:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-    if (!opportunity) {
-        notFound();
+    if (id) {
+      fetchData();
     }
+  }, [id]);
 
-    return (
-        <div className="p-6 md:p-8">
-            <h1 className="text-3xl font-bold font-headline mb-8">Edit Opportunity</h1>
-            <OpportunityForm opportunity={opportunity} />
-        </div>
-    );
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+
+  return (
+    <div className="container mx-auto py-10">
+      <h1 className="text-3xl font-bold mb-6">Edit Opportunity</h1>
+      <EditOpportunityForm opportunity={opportunity} />
+    </div>
+  );
 }

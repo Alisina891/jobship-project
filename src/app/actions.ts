@@ -1,7 +1,7 @@
 'use server';
 
 import { opportunityRecommendation, OpportunityRecommendationOutput } from '@/ai/flows/opportunity-recommendation';
-import { opportunities } from '@/lib/data';
+import { fetchOpportunities } from '@/lib/data';
 import { z } from 'zod';
 
 const recommendationSchema = z.object({
@@ -26,21 +26,27 @@ export async function getRecommendations(
   }
 
   try {
-    const opportunityListings = JSON.stringify(
-      opportunities.map(o => ({
-        id: o.id,
-        title: o.title,
-        description: o.description,
-      }))
-    );
+    // اول فرصت‌ها را بگیر
+    const opportunities = await fetchOpportunities();
 
+    // فقط فیلدهای لازم را نگه دار
+    const simplifiedOpportunities = opportunities.map(o => ({
+      id: o.id,
+      title: o.title,
+      description: o.description,
+    }));
+
+    // تبدیل به JSON برای فرستادن به AI
+    const opportunityListings = JSON.stringify(simplifiedOpportunities);
+
+    // درخواست به AI
     const result = await opportunityRecommendation({
       userProfile: validatedFields.data.userProfile,
-      opportunityListings: opportunityListings,
+      opportunityListings,
     });
 
     if (!result || !result.recommendedOpportunities) {
-        return { error: 'The AI could not generate recommendations. Please try again.' };
+      return { error: 'The AI could not generate recommendations. Please try again.' };
     }
 
     return { data: result };

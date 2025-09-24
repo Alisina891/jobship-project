@@ -174,21 +174,35 @@ const handleProfileSave = async () => {
   }, []);
 
   // --- Upload Functions ---
-  const triggerFilePicker = () => fileInputRef.current?.click();
-
-  const onFileChange: React.ChangeEventHandler<HTMLInputElement> = (e) => {
-    const file = e.target.files?.[0] || null;
-    setNewImage(file);
+ const onFileChange: React.ChangeEventHandler<HTMLInputElement> = (e) => {
+  const file = e.target.files?.[0];
+  if (!file) {
+    setNewImage(null);
+    setPreviewUrl(null);
     setUploadError(null);
+    return;
+  }
 
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => setPreviewUrl(reader.result as string);
-      reader.readAsDataURL(file);
-    } else {
-      setPreviewUrl(null);
-    }
-  };
+  const maxSizeKB = 300;
+  const fileSizeKB = file.size / 1024;
+  console.log("Selected file size (KB):", fileSizeKB); // برای debug
+
+  if (fileSizeKB > maxSizeKB) {
+    setUploadError(`File size should not exceed ${maxSizeKB} KB. Your file: ${fileSizeKB.toFixed(2)} KB`);
+    setNewImage(null);
+    setPreviewUrl(null);
+    return;
+  }
+
+  setUploadError(null);
+  setNewImage(file);
+
+  const reader = new FileReader();
+  reader.onloadend = () => setPreviewUrl(reader.result as string);
+  reader.readAsDataURL(file);
+};
+
+
 
   const handleUpload = async () => {
     if (!newImage) return alert("Please select a file first!");

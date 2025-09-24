@@ -1,11 +1,11 @@
-import { opportunities } from '@/lib/data';
+import { fetchOpportunities } from '@/lib/data';
 import { OpportunityCard } from '@/components/opportunities/opportunity-card';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 
-export function FeaturedJobs() {
-  const featuredJobs = opportunities
-    .filter((op) => op.type === 'Job' && op.featured)
+export async  function FeaturedJobs() {
+  const featuredJobs =  await fetchOpportunities()
+    featuredJobs.filter((op) => op.type === 'Job' && op.featured)
     .slice(0, 4);
 
   if (featuredJobs.length === 0) {
