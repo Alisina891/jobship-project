@@ -18,7 +18,7 @@ export default function ManageUsersPage() {
   useEffect(() => {
     async function fetchUsers() {
       try {
-        const res = await fetch("http://localhost:5071/api/auth/users"); // 👈 call your backend
+        const res = await fetch("https://jobship-backend-8.onrender.com/api/auth/users"); // 👈 call your backend
         const data = await res.json();
         setUsers(data);
       } catch (error) {

@@ -107,7 +107,7 @@ const handleProfileSave = async () => {
   const token = localStorage.getItem("token");
   if (token) {
     try {
-      const res = await fetch("http://localhost:5071/api/auth/updateProfile", {
+      const res = await fetch("https://jobship-backend-8.onrender.com/api/auth/updateProfile", {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -152,7 +152,7 @@ const handleProfileSave = async () => {
       return;
     }
 
-    fetch("http://localhost:5071/api/auth/me", {
+    fetch("https://jobship-backend-8.onrender.com/api/auth/me", {
       headers: { Authorization: `Bearer ${token}` },
     })
       .then(async (res) => {
@@ -217,7 +217,7 @@ const handleProfileSave = async () => {
       const token = localStorage.getItem("token");
       if (!token) throw new Error("No authentication token found");
       
-      const res = await fetch("http://localhost:5071/api/Upload/UploadImage", {
+      const res = await fetch("https://jobship-backend-8.onrender.com/api/Upload/UploadImage", {
         method: "POST",
         body: formData,
         headers: {
@@ -231,7 +231,7 @@ const handleProfileSave = async () => {
       }
       
       const data = await res.json();
-      setImageUrl(`http://localhost:5071${data.fileUrl}`);
+      setImageUrl(`https://jobship-backend-8.onrender.com${data.fileUrl}`);
       
       // Update user data with new image URL
       if (user) {
@@ -313,7 +313,7 @@ const handleProfileSave = async () => {
             <div className="relative w-40 h-40 -mt-20">
               {previewUrl || user.imageUrl ? (
                 <Image
-                  src={previewUrl || (user.imageUrl ? `http://localhost:5071${user.imageUrl}` : "/img/sc.png")}
+                  src={previewUrl || (user.imageUrl ? `https://jobship-backend-8.onrender.com${user.imageUrl}` : "/img/sc.png")}
                   alt="Profile Picture"
                   fill
                   className="object-cover rounded-full border-4 border-background shadow-lg"

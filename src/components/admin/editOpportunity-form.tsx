@@ -81,7 +81,7 @@ export function EditOpportunityForm({ opportunity }: SimpleEditOpportunityProps)
         postDate: formData.postDate ? new Date(formData.postDate).toISOString() : null,
       };
 
-      const response = await fetch(`http://localhost:5071/api/Post/post/${opportunity.id}`, {
+      const response = await fetch(`https://jobship-backend-8.onrender.com/api/Post/post/${opportunity.id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",

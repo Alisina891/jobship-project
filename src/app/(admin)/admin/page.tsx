@@ -42,7 +42,7 @@ export default function AdminDashboardPage() {
     
       async function fetchUsers() {
         try {
-          const res = await fetch("http://localhost:5071/api/auth/users", {
+          const res = await fetch("https://jobship-backend-8.onrender.com/api/auth/users", {
             headers: { Authorization: `Bearer ${token}` },
           });
           const data = await res.json();
@@ -54,7 +54,7 @@ export default function AdminDashboardPage() {
 
       async function fetchPosts() {
         try {
-          const res = await fetch("http://localhost:5071/api/post/posts", {
+          const res = await fetch("https://jobship-backend-8.onrender.com/api/post/posts", {
             cache: "no-store",
             headers: { Authorization: `Bearer ${token}` },
           });

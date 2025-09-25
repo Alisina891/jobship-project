@@ -27,7 +27,7 @@ export const sponsors: Sponsor[] = [
 export async function fetchOpportunities(search?: string): Promise<Opportunity[]> {
   try {
     // ساخت URL با پارامتر سرچ
-    const url = new URL("http://localhost:5071/api/post/posts");
+    const url = new URL("https://jobship-backend-8.onrender.com/api/post/posts");
     if (search?.trim()) {
       url.searchParams.append("search", search.trim());
     }

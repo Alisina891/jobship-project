@@ -169,7 +169,7 @@ export function OpportunityForm({ opportunity }: OpportunityFormProps) {
   const onSubmit = async (data: OpportunityFormValues) => {
   try {
     const token = localStorage.getItem('token'); // یا هر جایی که توکن رو ذخیره می‌کنی
-    const response = await fetch("http://localhost:5071/api/Post/post", {
+    const response = await fetch("https://jobship-backend-8.onrender.com/api/Post/post", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

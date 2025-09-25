@@ -1,7 +1,7 @@
 // utils/checkAdmin.ts
 export async function checkEmployer(token: string) {
   try {
-    const res = await fetch("http://localhost:5071/api/employer", {
+    const res = await fetch("https://jobship-backend-8.onrender.com/api/employer", {
       headers: { Authorization: `Bearer ${token}` },
     });
 

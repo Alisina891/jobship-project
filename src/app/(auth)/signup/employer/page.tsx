@@ -111,7 +111,7 @@ export default function EmployerSignupPage() {
       setStep((s) => s + 1);
     } else {
       try {
-        const res = await fetch('http://localhost:5071/api/Auth/register', {
+        const res = await fetch('https://jobship-backend-8.onrender.com/api/Auth/register', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(
