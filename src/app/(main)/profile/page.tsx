@@ -92,7 +92,7 @@ export default function ProfilePage() {
 
 
 
-  useEffect(() => {
+ useEffect(() => {
   if (user) {
     setEditFirstName(user.firstName);
     setEditLastName(user.lastName);
@@ -101,7 +101,11 @@ export default function ProfilePage() {
   }
 }, [user]);
 
-
+// ✅ این تابع را اضافه کن
+const triggerFilePicker = () => {
+  console.log("🔧 triggerFilePicker is working!");
+  fileInputRef.current?.click();
+};
 
 const handleProfileSave = async () => {
   const token = localStorage.getItem("token");
@@ -131,8 +135,6 @@ const handleProfileSave = async () => {
       } : null);
 
       setShowEditProfile(false);
-
-      // نمایش تیک بیرون از مودال
       setShowSuccessTickOutside(true);
       setTimeout(() => setShowSuccessTickOutside(false), 3000);
     } catch (err: any) {
@@ -140,7 +142,6 @@ const handleProfileSave = async () => {
     }
   }
 };
-
 
 
   // --- Fetch User ---
