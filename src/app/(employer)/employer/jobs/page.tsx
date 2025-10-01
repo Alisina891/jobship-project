@@ -12,7 +12,7 @@ import type { Opportunity } from '@/lib/types';
 async function fetchOpportunities(): Promise<Opportunity[]> {
   try {
     const token = localStorage.getItem("token"); // توکن ذخیره‌شده
-    const res = await fetch("http://localhost:5071/api/post/my-posts", {
+    const res = await fetch("https://jobship-backend-8.onrender.com/api/post/my-posts", {
       cache: "no-store",
       headers: {
         "Authorization": token ? `Bearer ${token}` : "",
