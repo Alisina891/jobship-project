@@ -15,7 +15,7 @@ export default function EditOpportunityPage() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await fetch(`http://localhost:5071/api/Post/post/${id}`);
+        const response = await fetch(`https://jobship-backend-8.onrender.com/api/Post/post/${id}`);
         if (response.ok) {
           const data = await response.json();
           setOpportunity(data);
